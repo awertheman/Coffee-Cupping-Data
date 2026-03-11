@@ -1,15 +1,16 @@
 openapi: 3.1.0
 info:
-  # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: CVA Coffee Cupping API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: cuppings
+    description: Cupping session operations
 paths:
   /healthz:
     get:
@@ -24,6 +25,93 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+  /cuppings:
+    get:
+      operationId: listCuppings
+      tags: [cuppings]
+      summary: List all cupping sessions
+      responses:
+        "200":
+          description: List of cupping sessions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/CuppingSession"
+    post:
+      operationId: createCupping
+      tags: [cuppings]
+      summary: Create a new cupping session
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateCuppingSession"
+      responses:
+        "201":
+          description: Created cupping session
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CuppingSession"
+  /cuppings/{id}:
+    get:
+      operationId: getCupping
+      tags: [cuppings]
+      summary: Get a cupping session by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Cupping session
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CuppingSession"
+        "404":
+          description: Not found
+    put:
+      operationId: updateCupping
+      tags: [cuppings]
+      summary: Update a cupping session
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateCuppingSession"
+      responses:
+        "200":
+          description: Updated cupping session
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CuppingSession"
+    delete:
+      operationId: deleteCupping
+      tags: [cuppings]
+      summary: Delete a cupping session
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted successfully
 components:
   schemas:
     HealthStatus:
@@ -33,4 +121,118 @@ components:
           type: string
       required:
         - status
-
+    ScoreAttribute:
+      type: object
+      description: A scored attribute with intensity and quality notes
+      properties:
+        score:
+          type: number
+          format: float
+          minimum: 6
+          maximum: 10
+        intensity:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 5
+        notes:
+          type: string
+      required:
+        - score
+    BooleanAttribute:
+      type: object
+      description: A boolean scored attribute (uniformity, clean cup, sweetness)
+      properties:
+        score:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 10
+        notes:
+          type: string
+      required:
+        - score
+    CreateCuppingSession:
+      type: object
+      properties:
+        sampleId:
+          type: string
+          description: Sample identifier / lot code
+        origin:
+          type: string
+          description: Coffee origin
+        variety:
+          type: string
+          description: Coffee variety/cultivar
+        process:
+          type: string
+          description: Processing method
+        roastDate:
+          type: string
+          description: Roast date
+        roastLevel:
+          type: string
+          description: Roast level
+        cuppingDate:
+          type: string
+          description: Date of cupping
+        cupperName:
+          type: string
+          description: Name of the cupper
+        fragranceAroma:
+          $ref: "#/components/schemas/ScoreAttribute"
+        flavor:
+          $ref: "#/components/schemas/ScoreAttribute"
+        aftertaste:
+          $ref: "#/components/schemas/ScoreAttribute"
+        acidity:
+          $ref: "#/components/schemas/ScoreAttribute"
+        body:
+          $ref: "#/components/schemas/ScoreAttribute"
+        balance:
+          $ref: "#/components/schemas/ScoreAttribute"
+        uniformity:
+          $ref: "#/components/schemas/BooleanAttribute"
+        cleanCup:
+          $ref: "#/components/schemas/BooleanAttribute"
+        sweetness:
+          $ref: "#/components/schemas/BooleanAttribute"
+        overall:
+          $ref: "#/components/schemas/ScoreAttribute"
+        defects:
+          type: object
+          properties:
+            taints:
+              type: integer
+              minimum: 0
+              maximum: 5
+            faults:
+              type: integer
+              minimum: 0
+              maximum: 5
+            notes:
+              type: string
+        finalScore:
+          type: number
+          format: float
+        notes:
+          type: string
+      required:
+        - sampleId
+    CuppingSession:
+      allOf:
+        - $ref: "#/components/schemas/CreateCuppingSession"
+        - type: object
+          properties:
+            id:
+              type: integer
+            createdAt:
+              type: string
+              format: date-time
+            updatedAt:
+              type: string
+              format: date-time
+          required:
+            - id
+            - createdAt
+            - updatedAt

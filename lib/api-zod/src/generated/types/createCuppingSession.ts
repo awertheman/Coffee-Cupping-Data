@@ -5,52 +5,9 @@
  * CVA Coffee Cupping API
  * OpenAPI spec version: 0.1.0
  */
-export interface HealthStatus {
-  status: string;
-}
-
-/**
- * A scored attribute with intensity and quality notes
- */
-export interface ScoreAttribute {
-  /**
-   * @minimum 6
-   * @maximum 10
-   */
-  score: number;
-  /**
-   * @minimum 0
-   * @maximum 5
-   */
-  intensity?: number;
-  notes?: string;
-}
-
-/**
- * A boolean scored attribute (uniformity, clean cup, sweetness)
- */
-export interface BooleanAttribute {
-  /**
-   * @minimum 0
-   * @maximum 10
-   */
-  score: number;
-  notes?: string;
-}
-
-export type CreateCuppingSessionDefects = {
-  /**
-   * @minimum 0
-   * @maximum 5
-   */
-  taints?: number;
-  /**
-   * @minimum 0
-   * @maximum 5
-   */
-  faults?: number;
-  notes?: string;
-};
+import type { BooleanAttribute } from "./booleanAttribute";
+import type { CreateCuppingSessionDefects } from "./createCuppingSessionDefects";
+import type { ScoreAttribute } from "./scoreAttribute";
 
 export interface CreateCuppingSession {
   /** Sample identifier / lot code */
@@ -83,9 +40,3 @@ export interface CreateCuppingSession {
   finalScore?: number;
   notes?: string;
 }
-
-export type CuppingSession = CreateCuppingSession & {
-  id: number;
-  createdAt: string;
-  updatedAt: string;
-};
